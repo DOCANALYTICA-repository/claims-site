@@ -62,7 +62,7 @@ function CreateFormPage() {
       const uploadFormData = new FormData();
       uploadFormData.append('document', document);
       try {
-        const { data } = await axios.post('http://localhost:5001/api/upload', uploadFormData);
+        const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/api/upload`, uploadFormData);
         documentPath = data.path;
         setUploading(false);
       } catch (error) {

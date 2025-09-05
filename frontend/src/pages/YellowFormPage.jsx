@@ -53,13 +53,16 @@ function YellowFormPage() {
     try {
       const newFormData = {
         formType: 'Yellow',
-        formData: { eventName, students },
+        formData: {
+          eventName,
+          students,
+        },
       };
       await formService.createForm(newFormData, user.token);
-      toast({ title: 'Form Submitted', status: 'success', duration: 3000, isClosable: true });
-      window.location.href = '/hod';
+      // Redirect to the correct Club dashboard with a full reload
+      window.location.href = '/club'; 
     } catch (error) {
-      toast({ title: 'Submission Failed', description: error.message, status: 'error', duration: 5000, isClosable: true });
+      console.error('Failed to create form:', error);
     }
   };
 
