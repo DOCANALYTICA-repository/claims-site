@@ -64,6 +64,9 @@ function HodDashboard() {
           <Tbody>
             {forms.map((form) => (
               <Tr key={form._id}>
+                <Td>
+                  <Link as={RouterLink} to={`/form/${form._id}`}>{form.formType}</Link>
+                </Td>
                 <Td>{form.submittedBy ? form.submittedBy.name : 'N/A'}</Td>
                 <Td>{form.formType}</Td>
                 <Td>

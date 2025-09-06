@@ -17,6 +17,7 @@ import YellowFormPage from './pages/YellowFormPage.jsx';
 import ClubDashboard from './pages/ClubDashboard.jsx';
 import PinkFormPage from './pages/PinkFormPage.jsx';
 import TeacherDashboard from './pages/TeacherDashboard.jsx';
+import FormDetailsPage from './pages/FormDetailsPage.jsx';
 
 // Define our routes
 const router = createBrowserRouter([
@@ -82,6 +83,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <TeacherDashboard />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/form/:id', // <-- ADD NEW DYNAMIC ROUTE
+        element: (
+          <ProtectedRoute>
+            <FormDetailsPage />
           </ProtectedRoute>
         ),
       },

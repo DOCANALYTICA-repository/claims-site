@@ -1,6 +1,22 @@
 import { useEffect, useState, useContext } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import { Box, Heading, Text, Table, Thead, Tbody, Tr, Th, Td, Badge, Stack, Skeleton, Button, HStack } from '@chakra-ui/react';
+import {
+  Box,
+  Heading,
+  Text,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Badge,
+  Stack,
+  Skeleton,
+  Button,
+  HStack,
+  Link, // <-- IMPORT THIS
+} from '@chakra-ui/react';
 import AuthContext from '../context/AuthContext';
 import formService from '../services/formService';
 
@@ -38,7 +54,6 @@ function StudentDashboard() {
   return (
     <Box>
       <Heading as="h1" size="lg" mb={4}>Welcome, {user.name}</Heading>
-
       <HStack spacing={4} mb={8}>
         <Button as={RouterLink} to="/create-form" colorScheme="blue">
           Create New Blue Form
@@ -48,7 +63,7 @@ function StudentDashboard() {
         </Button>
       </HStack>
 
-      <Heading as="h2" size="md" mb={4}>
+      <Heading as="h2" size="md" mt={8} mb={4}>
         Your Submitted Forms
       </Heading>
 
@@ -64,7 +79,12 @@ function StudentDashboard() {
           <Tbody>
             {forms.map((form) => (
               <Tr key={form._id}>
-                <Td>{form.formType}</Td>
+                <Td>
+                  {/* Use the Link component here */}
+                  <Link as={RouterLink} to={`/form/${form._id}`} fontWeight="bold">
+                    {form.formType}
+                  </Link>
+                </Td>
                 <Td>
                   <Badge colorScheme={form.status === 'Approved' ? 'green' : form.status === 'Rejected' ? 'red' : 'yellow'}>
                     {form.status}

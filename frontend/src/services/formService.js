@@ -54,6 +54,13 @@ const teacherApproveForm = async (formId, statusData, token) => {
   return response.data;
 };
 
+// NEW: Get single form by ID
+const getFormById = async (formId, token) => {
+  const config = { headers: { Authorization: `Bearer ${token}` } };
+  const response = await axios.get(API_URL + formId, config);
+  return response.data;
+};
+
 const formService = {
   createForm,
   getUserForms,
@@ -61,6 +68,7 @@ const formService = {
   updateFormStatus,
   getTeacherApprovalForms,
   teacherApproveForm,
+  getFormById,
 };
 
 export default formService;

@@ -5,10 +5,7 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   // Check localStorage for an existing user session
-  const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem('user');
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
+  const [user, setUser] = useState(null);
 
   // Login function
   const login = async (userData) => {

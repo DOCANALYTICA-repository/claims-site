@@ -199,3 +199,27 @@ export const teacherApproveForm = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+// @desc   Get a single form by ID
+// @route  GET /api/forms/:id
+// @access Private
+export const getFormById = async (req, res) => {
+  try {
+    const form = await Form.findById(req.params.id).populate('submittedBy', 'name email');
+
+    if (!form) {
+      res.status(404);
+      throw new Error('Form not found');
+    }
+
+    // Authorization check: User must be the submitter or an admin
+    if (form.submittedBy._id.toString() !== req.user._id.toString() && req.user.role !== 'Faculty/Staff') {
+        res.status(401);
+        throw new Error('User not authorized');
+    }
+
+    res.status(200).json(form);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
