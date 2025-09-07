@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/userModel.js';
+import config from '../config.js';
 
 export const protect = async (req, res, next) => {
   let token;
@@ -7,12 +8,20 @@ export const protect = async (req, res, next) => {
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     try {
       token = req.headers.authorization.split(' ')[1];
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      const decoded = jwt.verify(token, config.jwtSecret);
+
       req.user = await User.findById(decoded.id).select('-password');
+
       next();
     } catch (error) {
-      console.error(error);
+      // --- DETAILED ERROR LOGGING ---
+      console.error('--- TOKEN VERIFICATION FAILED ---');
+      console.error(error); // Log the entire error object
+      // --- END OF LOGGING ---
+
       res.status(401);
+      // We throw the error so the frontend catch block can see it
       throw new Error('Not authorized, token failed');
     }
   }

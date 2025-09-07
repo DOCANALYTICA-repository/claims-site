@@ -15,10 +15,10 @@ import {
   Skeleton,
   Button,
   HStack,
-  Link, // <-- IMPORT THIS
+  Link,
 } from '@chakra-ui/react';
-import AuthContext from '../context/AuthContext';
-import formService from '../services/formService';
+import AuthContext from '../context/AuthContext.jsx';
+import formService from '../services/formService.js';
 
 function StudentDashboard() {
   const { user } = useContext(AuthContext);
@@ -27,24 +27,27 @@ function StudentDashboard() {
 
   useEffect(() => {
     const fetchForms = async () => {
+      // Safety check to ensure user and token exist before fetching
       if (user && user.token) {
         try {
-          const data = await formService.getUserForms(user.token);
+          const data = await formService.getUserForms();
           setForms(data);
         } catch (error) {
           console.error('Failed to fetch forms:', error);
         } finally {
+          // This will run whether the fetch succeeded or failed
           setIsLoading(false);
         }
       }
     };
+
     fetchForms();
-  }, [user]);
+  }, [user]); // Dependency array is correct
 
   if (isLoading) {
     return (
       <Stack>
-        <Skeleton height="20px" />
+        <Skeleton height="40px" />
         <Skeleton height="40px" />
         <Skeleton height="40px" />
       </Stack>
@@ -53,7 +56,9 @@ function StudentDashboard() {
 
   return (
     <Box>
-      <Heading as="h1" size="lg" mb={4}>Welcome, {user.name}</Heading>
+      {/* Added optional chaining `?` as a safety check */}
+      <Heading as="h1" size="lg" mb={4}>Welcome, {user?.name}</Heading>
+      
       <HStack spacing={4} mb={8}>
         <Button as={RouterLink} to="/create-form" colorScheme="blue">
           Create New Blue Form
@@ -80,7 +85,6 @@ function StudentDashboard() {
             {forms.map((form) => (
               <Tr key={form._id}>
                 <Td>
-                  {/* Use the Link component here */}
                   <Link as={RouterLink} to={`/form/${form._id}`} fontWeight="bold">
                     {form.formType}
                   </Link>

@@ -1,8 +1,23 @@
 import { useEffect, useState, useContext } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import { Box, Heading, Text, Table, Thead, Tbody, Tr, Th, Td, Badge, Stack, Skeleton, Button } from '@chakra-ui/react';
-import AuthContext from '../context/AuthContext';
-import formService from '../services/formService';
+import {
+  Box,
+  Heading,
+  Text,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Badge,
+  Stack,
+  Skeleton,
+  Button,
+  Link,
+} from '@chakra-ui/react';
+import AuthContext from '../context/AuthContext.jsx';
+import formService from '../services/formService.js';
 
 function ClubDashboard() {
   const { user } = useContext(AuthContext);
@@ -11,9 +26,10 @@ function ClubDashboard() {
 
   useEffect(() => {
     const fetchForms = async () => {
-      if (user && user.token) {
+      if (user) {
         try {
-          const data = await formService.getUserForms(user.token);
+          // CORRECTED: Call the simpler function without the token
+          const data = await formService.getUserForms();
           setForms(data);
         } catch (error) {
           console.error('Failed to fetch forms:', error);
@@ -28,7 +44,7 @@ function ClubDashboard() {
   if (isLoading) {
     return (
       <Stack>
-        <Skeleton height="20px" />
+        <Skeleton height="40px" />
         <Skeleton height="40px" />
         <Skeleton height="40px" />
       </Stack>
@@ -37,7 +53,8 @@ function ClubDashboard() {
 
   return (
     <Box>
-      <Heading as="h1" size="lg" mb={4}>Welcome, {user.name}</Heading>
+      {/* CORRECTED: Added safety check for user name */}
+      <Heading as="h1" size="lg" mb={4}>Welcome, {user?.name}</Heading>
 
       <Button as={RouterLink} to="/yellow-form" colorScheme="yellow" mb={8}>
         Submit New Yellow Form
@@ -59,7 +76,12 @@ function ClubDashboard() {
           <Tbody>
             {forms.map((form) => (
               <Tr key={form._id}>
-                <Td>{form.formData.eventName}</Td>
+                <Td>
+                  {/* NEW: Made event name a clickable link */}
+                  <Link as={RouterLink} to={`/form/${form._id}`} fontWeight="bold">
+                    {form.formData.eventName}
+                  </Link>
+                </Td>
                 <Td>
                   <Badge colorScheme={form.status === 'Approved' ? 'green' : form.status === 'Rejected' ? 'red' : 'yellow'}>
                     {form.status}

@@ -1,10 +1,12 @@
 import User from '../models/userModel.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import config from '../config.js';
 
 // Helper function to generate a JWT
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
+  // Temporarily use a hardcoded secret
+  return jwt.sign({ id }, config.jwtSecret, {
     expiresIn: '30d',
   });
 };
@@ -69,6 +71,7 @@ export const loginUser = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        designation: user.designation, // <-- ADD THIS LINE
         token: generateToken(user._id),
       });
     } else {

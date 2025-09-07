@@ -1,20 +1,25 @@
-import { createContext, useState, useEffect } from 'react';
-import authService from '../services/authService';
+import { createContext, useState } from 'react';
+import authService from '../services/authService.js';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  // Check localStorage for an existing user session
-  const [user, setUser] = useState(null);
+  // THE FIX: Initialize state from localStorage
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('user');
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch (error) {
+      return null;
+    }
+  });
 
-  // Login function
   const login = async (userData) => {
     const user = await authService.login(userData);
     setUser(user);
-    return user; // <-- ADD THIS LINE
+    return user;
   };
 
-  // Logout function
   const logout = () => {
     localStorage.removeItem('user');
     setUser(null);

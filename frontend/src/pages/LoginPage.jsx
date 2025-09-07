@@ -9,10 +9,10 @@ import {
   VStack,
   Heading,
   Text,
-  Flex, // <-- ADD THIS LINE
+  Flex,
   useToast,
 } from '@chakra-ui/react';
-import AuthContext from '../context/AuthContext.jsx';
+import AuthContext from '../context/AuthContext.jsx'; // Corrected import path
 
 function LoginPage() {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -33,16 +33,25 @@ function LoginPage() {
         title: 'Login Successful.',
         description: `Welcome back, ${user.name}!`,
         status: 'success',
-        duration: 5000,
+        duration: 3000,
         isClosable: true,
       });
-      if (user.role === 'Faculty/Staff') {
+
+      // --- CORRECTED REDIRECT LOGIC ---
+      // 1. Check for the most specific role first (HOD)
+      if (user.role === 'Faculty/Staff' && user.designation === 'HOD') {
         navigate('/hod');
-      } else if (user.role === 'Club') {
-        navigate('/club');
-      } else if (user.role === 'Faculty/Staff') { // <-- NEW: Catch other faculty
+      } 
+      // 2. Then, check for any other faculty
+      else if (user.role === 'Faculty/Staff') {
         navigate('/teacher');
-      } else {
+      } 
+      // 3. Then, check for Club
+      else if (user.role === 'Club') {
+        navigate('/club');
+      } 
+      // 4. Default to Student dashboard
+      else {
         navigate('/');
       }
     } catch (error) {
@@ -70,7 +79,7 @@ function LoginPage() {
             <FormLabel>Password</FormLabel>
             <Input type="password" name="password" value={password} onChange={onChange} />
           </FormControl>
-          <Button type="submit" colorScheme="teal" width="full">
+          <Button type="submit" colorScheme="brand" width="full"> {/* Use consistent brand color */}
             Login
           </Button>
         </VStack>
