@@ -22,7 +22,10 @@ app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 
 const startServer = async () => {
   try {
-    await mongoose.connect(config.mongoURI); // <-- USE CONFIG
+    // ADD THIS LINE to see the connection string
+    console.log('Attempting to connect to:', config.mongoURI);
+
+    await mongoose.connect(config.mongoURI);
     console.log('✅ Successfully connected to the database');
 
     app.listen(PORT, () => {
