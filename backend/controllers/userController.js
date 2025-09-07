@@ -1,12 +1,11 @@
 import User from '../models/userModel.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import config from '../config.js';
 
 // Helper function to generate a JWT
 const generateToken = (id) => {
-  // Temporarily use a hardcoded secret
-  return jwt.sign({ id }, config.jwtSecret, {
+  // Use process.env again
+  return jwt.sign({ id }, process.env.JWT_SECRET, { 
     expiresIn: '30d',
   });
 };

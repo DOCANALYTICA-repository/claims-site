@@ -2,13 +2,13 @@ import path from 'path';
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
-import config from './config.js'; // <-- IMPORT CONFIG
+import config from './config.js'; // <-- Import our config file
 import userRoutes from './routes/userRoutes.js';
 import formRoutes from './routes/formRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 
 const app = express();
-const PORT = 5001; // We can hardcode this or add it to the config file
+const PORT = 5001;
 
 app.use(cors());
 app.use(express.json());
@@ -22,9 +22,7 @@ app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 
 const startServer = async () => {
   try {
-    // ADD THIS LINE to see the connection string
-    console.log('Attempting to connect to:', config.mongoURI);
-
+    // Use the imported config object
     await mongoose.connect(config.mongoURI);
     console.log('✅ Successfully connected to the database');
 
