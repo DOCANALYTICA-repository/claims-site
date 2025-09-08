@@ -1,8 +1,9 @@
 import axios from 'axios';
 
 const api = axios.create({
-  // For local development
   baseURL: 'https://claims-site.onrender.com/api', 
+  // For local version, you would use:
+  // baseURL: 'http://localhost:5001/api',
   // For deployed version, you would use:
   // baseURL: 'https://claims-site.onrender.com/api',
 });
