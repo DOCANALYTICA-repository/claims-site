@@ -64,6 +64,8 @@ export const loginUser = async (req, res) => {
         email: user.email,
         role: user.role,
         designation: user.designation,
+        regNo: user.regNo, // <-- ADD THIS LINE
+        empId: user.empId, // <-- ADD THIS LINE
         token: generateToken(user._id),
       });
     } else {
