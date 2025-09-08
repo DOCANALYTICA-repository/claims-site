@@ -2,20 +2,7 @@ import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Papa from 'papaparse';
 import {
-  Box,
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  VStack,
-  HStack,
-  Heading,
-  Text,
-  useToast,
-  Grid,
-  GridItem,
-  NumberInput,
-  NumberInputField,
+  Box, Button, FormControl, FormLabel, Input, VStack, HStack, Heading, Text, useToast, Grid, GridItem, NumberInput, NumberInputField
 } from '@chakra-ui/react';
 import AuthContext from '../context/AuthContext.jsx';
 import formService from '../services/formService.js';
@@ -58,13 +45,7 @@ function YellowFormPage() {
       skipEmptyLines: true,
       complete: (results) => {
         setStudents(results.data);
-        toast({
-          title: 'File Parsed',
-          description: `${results.data.length} students loaded.`,
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
+        toast({ title: 'File Parsed', description: `${results.data.length} students loaded.`, status: 'success', duration: 3000, isClosable: true });
       },
     });
   };
@@ -136,7 +117,7 @@ function YellowFormPage() {
               <Input variant="flushed" placeholder="Reg No" name="regNo" value={student.regNo} onChange={(e) => handleStudentChange(index, e)} />
               <Input variant="flushed" placeholder="Student Name" name="studentName" value={student.studentName} onChange={(e) => handleStudentChange(index, e)} />
               <Input variant="flushed" placeholder="Class Name" name="className" value={student.className} onChange={(e) => handleStudentChange(index, e)} />
-              <Button size="sm" colorScheme="red" variant="ghost" onClick={() => removeStudentRow(index)}>Remove</button>
+              <Button size="sm" colorScheme="red" variant="ghost" onClick={() => removeStudentRow(index)}>Remove</Button>
             </HStack>
           ))}
           <Button size="sm" onClick={addStudentRow} alignSelf="flex-start" mt={2}>Add Student</Button>
