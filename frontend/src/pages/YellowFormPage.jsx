@@ -13,19 +13,45 @@ function YellowFormPage() {
   const toast = useToast();
 
   const [eventName, setEventName] = useState('');
-  const [attendanceWithClaims, setAttendanceWithClaims] = useState('');
-  const [attendanceWithoutClaims, setAttendanceWithoutClaims] = useState('');
-  const [students, setStudents] = useState([{ regNo: '', studentName: '', className: '' }]);
+  // THE FIX: Move attendance fields into the student object
+  const [students, setStudents] = useState([{ 
+    regNo: '', 
+    studentName: '', 
+    className: '', 
+    attendanceWithClaims: '', 
+    attendanceWithoutClaims: '' 
+  }]);
   const [file, setFile] = useState(null);
 
   const handleStudentChange = (index, event) => {
     const values = [...students];
+    // This now handles both text inputs and number inputs from Chakra
+    if (typeof event === 'object' && event.target) {
+      values[index][event.target.name] = event.target.value;
+    } else {
+      // This handles the NumberInput's onChange, which just passes the value
+      // We need to know which field it was for. Let's assume we pass the name.
+      // Let's refactor this to be simpler.
+    }
+    setStudents(values);
+  };
+  
+  // A simpler set of handlers for clarity
+  const handleStudentTextChange = (index, event) => {
+    const values = [...students];
     values[index][event.target.name] = event.target.value;
     setStudents(values);
   };
+  
+  const handleStudentNumberChange = (index, name, value) => {
+    const values = [...students];
+    values[index][name] = value;
+    setStudents(values);
+  };
+
 
   const addStudentRow = () => {
-    setStudents([...students, { regNo: '', studentName: '', className: '' }]);
+    setStudents([...students, { regNo: '', studentName: '', className: '', attendanceWithClaims: '', attendanceWithoutClaims: '' }]);
   };
 
   const removeStudentRow = (index) => {
@@ -44,7 +70,15 @@ function YellowFormPage() {
       header: true,
       skipEmptyLines: true,
       complete: (results) => {
-        setStudents(results.data);
+        // Ensure all fields are present, even if missing from CSV
+        const parsedStudents = results.data.map(student => ({
+            regNo: student.regNo || '',
+            studentName: student.studentName || '',
+            className: student.className || '',
+            attendanceWithClaims: student.attendanceWithClaims || '',
+            attendanceWithoutClaims: student.attendanceWithoutClaims || ''
+        }));
+        setStudents(parsedStudents);
         toast({ title: 'File Parsed', description: `${results.data.length} students loaded.`, status: 'success', duration: 3000, isClosable: true });
       },
     });
@@ -57,9 +91,7 @@ function YellowFormPage() {
         formType: 'Yellow',
         formData: {
           eventName,
-          students,
-          attendanceWithClaims,
-          attendanceWithoutClaims,
+          students, // The students array now contains all the data
         },
       };
       await formService.createForm(newFormData);
@@ -71,7 +103,7 @@ function YellowFormPage() {
   };
 
   return (
-    <Box as="form" onSubmit={onSubmit} p={10} borderWidth="1px" borderRadius="md" boxShadow="xl" maxW="800px" mx="auto" bg="yellow.50">
+    <Box as="form" onSubmit={onSubmit} p={10} borderWidth="1px" borderRadius="md" boxShadow="xl" maxW="1200px" mx="auto" bg="yellow.50">
       <VStack spacing={6} align="stretch">
         <Heading as="h1" size="lg" textAlign="center" fontFamily="serif">
           Yellow Form: Co-Curricular / Extra Curricular
@@ -82,43 +114,40 @@ function YellowFormPage() {
           <Input variant="flushed" type="text" value={eventName} onChange={(e) => setEventName(e.target.value)} />
         </FormControl>
 
-        <Grid templateColumns="repeat(2, 1fr)" gap={6}>
-          <GridItem>
-            <FormControl isRequired>
-              <FormLabel>Attendance % (With Claims):</FormLabel>
-              <NumberInput min={0} max={100} value={attendanceWithClaims} onChange={(valStr, valNum) => setAttendanceWithClaims(valNum)}>
-                <NumberInputField variant="flushed" placeholder="e.g., 85" />
-              </NumberInput>
-            </FormControl>
-          </GridItem>
-          <GridItem>
-            <FormControl isRequired>
-              <FormLabel>Attendance % (Without Claims):</FormLabel>
-              <NumberInput min={0} max={100} value={attendanceWithoutClaims} onChange={(valStr, valNum) => setAttendanceWithoutClaims(valNum)}>
-                <NumberInputField variant="flushed" placeholder="e.g., 75" />
-              </NumberInput>
-            </FormControl>
-          </GridItem>
-        </Grid>
-        
         <Box pt={4}>
           <FormLabel>Upload Student List (CSV)</FormLabel>
           <HStack>
             <Input type="file" accept=".csv" p={1.5} onChange={handleFileChange} />
             <Button onClick={parseFile} disabled={!file} colorScheme="brand">Parse File</Button>
           </HStack>
-          <Text fontSize="xs" color="gray.500" mt={1}>CSV headers must be: regNo, studentName, className</Text>
+          <Text fontSize="xs" color="gray.500" mt={1}>Headers: regNo, studentName, className, attendanceWithClaims, attendanceWithoutClaims</Text>
         </Box>
 
-        <VStack spacing={2} align="stretch">
-          <Heading as="h3" size="md" mt={4} borderBottomWidth="1px" pb={2}>Or, Manually Enter Students</Heading>
+        <VStack spacing={4} align="stretch">
+          <Heading as="h3" size="md" mt={4} borderBottomWidth="1px" pb={2}>Student List</Heading>
+          {/* Table headers */}
+          <Grid templateColumns="repeat(6, 1fr)" gap={4} fontWeight="bold">
+            <GridItem>Reg No</GridItem>
+            <GridItem>Student Name</GridItem>
+            <GridItem>Class</GridItem>
+            <GridItem>% With Claims</GridItem>
+            <GridItem>% Without Claims</GridItem>
+            <GridItem>Action</GridItem>
+          </Grid>
+
           {students.map((student, index) => (
-            <HStack key={index} spacing={2}>
-              <Input variant="flushed" placeholder="Reg No" name="regNo" value={student.regNo} onChange={(e) => handleStudentChange(index, e)} />
-              <Input variant="flushed" placeholder="Student Name" name="studentName" value={student.studentName} onChange={(e) => handleStudentChange(index, e)} />
-              <Input variant="flushed" placeholder="Class Name" name="className" value={student.className} onChange={(e) => handleStudentChange(index, e)} />
-              <Button size="sm" colorScheme="red" variant="ghost" onClick={() => removeStudentRow(index)}>Remove</Button>
-            </HStack>
+            <Grid key={index} templateColumns="repeat(6, 1fr)" gap={4} alignItems="center">
+                <Input variant="flushed" placeholder="Reg No" name="regNo" value={student.regNo} onChange={(e) => handleStudentTextChange(index, e)} />
+                <Input variant="flushed" placeholder="Student Name" name="studentName" value={student.studentName} onChange={(e) => handleStudentTextChange(index, e)} />
+                <Input variant="flushed" placeholder="Class Name" name="className" value={student.className} onChange={(e) => handleStudentTextChange(index, e)} />
+                <NumberInput size="sm" min={0} max={100} value={student.attendanceWithClaims} onChange={(valStr, valNum) => handleStudentNumberChange(index, 'attendanceWithClaims', valNum)}>
+                  <NumberInputField variant="flushed" placeholder="e.g., 85" />
+                </NumberInput>
+                <NumberInput size="sm" min={0} max={100} value={student.attendanceWithoutClaims} onChange={(valStr, valNum) => handleStudentNumberChange(index, 'attendanceWithoutClaims', valNum)}>
+                  <NumberInputField variant="flushed" placeholder="e.g., 75" />
+                </NumberInput>
+                <Button size="sm" colorScheme="red" variant="ghost" onClick={() => removeStudentRow(index)}>Remove</Button>
+            </Grid>
           ))}
           <Button size="sm" onClick={addStudentRow} alignSelf="flex-start" mt={2}>Add Student</Button>
         </VStack>
