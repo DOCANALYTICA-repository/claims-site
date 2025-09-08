@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
   // For local development
-  baseURL: 'http://localhost:5001/api', 
+  baseURL: 'https://claims-site.onrender.com/api', 
   // For deployed version, you would use:
   // baseURL: 'https://claims-site.onrender.com/api',
 });
