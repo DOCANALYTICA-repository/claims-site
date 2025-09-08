@@ -1,18 +1,13 @@
 import User from '../models/userModel.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import config from '../config.js'; // <-- 1. IMPORT THE CONFIG FILE
 
-// Helper function to generate a JWT
 const generateToken = (id) => {
-  // 2. USE THE IMPORTED CONFIG OBJECT
-  return jwt.sign({ id }, config.jwtSecret, {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: '30d',
   });
 };
 
-// @desc   Register a new user
-// @route  POST /api/users/register
 export const registerUser = async (req, res) => {
   try {
     const { name, email, regNo, empId, password, role, designation } = req.body;
@@ -53,12 +48,10 @@ export const registerUser = async (req, res) => {
       throw new Error('Invalid user data');
     }
   } catch (error) {
-    res.json({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 
-// @desc   Authenticate a user
-// @route  POST /api/users/login
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -78,12 +71,10 @@ export const loginUser = async (req, res) => {
       throw new Error('Invalid email or password');
     }
   } catch (error) {
-    res.json({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 
-// @desc   Get user data
-// @route  GET /api/users/me
 export const getMe = async (req, res) => {
   res.status(200).json(req.user);
 };

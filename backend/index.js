@@ -1,15 +1,23 @@
 import path from 'path';
-import { fileURLToPath } from 'url'; // Import for robust pathing
+import { fileURLToPath } from 'url';
 import express from 'express';
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 import cors from 'cors';
-import config from './config.js';
 import userRoutes from './routes/userRoutes.js';
 import formRoutes from './routes/formRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 
+// --- UNIFIED ENVIRONMENT CONFIGURATION ---
+// This will load the .env file ONLY if we are not in a production environment
+if (process.env.NODE_ENV !== 'production') {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  dotenv.config({ path: path.resolve(__dirname, '../.env') });
+}
+// --- END OF CONFIGURATION ---
+
 const app = express();
-// THE FIX: Use Render's port or fall back to 5001 for local development
 const PORT = process.env.PORT || 5001;
 
 app.use(cors());
@@ -19,14 +27,12 @@ app.use('/api/users', userRoutes);
 app.use('/api/forms', formRoutes);
 app.use('/api/upload', uploadRoutes);
 
-// THE FIX: A more reliable way to define __dirname
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
+const __dirname = path.resolve();
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const startServer = async () => {
   try {
-    await mongoose.connect(config.mongoURI);
+    await mongoose.connect(process.env.MONGO_URI);
     console.log('✅ Successfully connected to the database');
 
     app.listen(PORT, () => {
