@@ -8,7 +8,7 @@ import userRoutes from './routes/userRoutes.js';
 import formRoutes from './routes/formRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 
-// Define __dirname for ES Modules
+// Define __dirname for ES Modules (do this only once at the top)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -30,7 +30,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/forms', formRoutes);
 app.use('/api/upload', uploadRoutes);
 
-// Use the reliable __dirname to serve your uploads folder
+// Use the reliable __dirname (defined at the top) to serve your uploads folder
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 
 const startServer = async () => {
