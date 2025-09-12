@@ -6,6 +6,7 @@ import {
 } from '@chakra-ui/react';
 import AuthContext from '../context/AuthContext.jsx';
 import formService from '../services/formService.js';
+import Select from 'react-select';
 
 const periodOptions = [
   { value: 'Period7_00AM', label: '7:00 AM' },
