@@ -94,6 +94,14 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      { //                              <-- ADD THIS NEW ROUTE
+        path: '/re-apply/:id', // The :id is a dynamic parameter
+        element: (
+          <ProtectedRoute>
+            <CreateFormPage />
+          </ProtectedRoute>
+        ),
+      },
     ],
   },
 ]);
