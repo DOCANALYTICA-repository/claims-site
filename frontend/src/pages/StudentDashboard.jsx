@@ -27,22 +27,22 @@ function StudentDashboard() {
 
   useEffect(() => {
     const fetchForms = async () => {
-      // Safety check to ensure user and token exist before fetching
-      if (user && user.token) {
+      if (user) {
         try {
           const data = await formService.getUserForms();
           setForms(data);
         } catch (error) {
           console.error('Failed to fetch forms:', error);
         } finally {
-          // This will run whether the fetch succeeded or failed
           setIsLoading(false);
         }
+      } else {
+        setIsLoading(false);
       }
     };
 
     fetchForms();
-  }, [user]); // Dependency array is correct
+  }, [user]);
 
   if (isLoading) {
     return (
@@ -56,7 +56,6 @@ function StudentDashboard() {
 
   return (
     <Box>
-      {/* Added optional chaining `?` as a safety check */}
       <Heading as="h1" size="lg" mb={4}>Welcome, {user?.name}</Heading>
       
       <HStack spacing={4} mb={8}>
@@ -72,7 +71,7 @@ function StudentDashboard() {
         Your Submitted Forms
       </Heading>
 
-      {forms && forms.length > 0 ? (
+      {(forms || []).length > 0 ? (
         <Table variant="striped" colorScheme="brand">
           <Thead>
             <Tr>
@@ -93,6 +92,7 @@ function StudentDashboard() {
                   </Link>
                 </Td>
                 <Td>
+                  {/* Corrected Badge Logic */}
                   <Badge colorScheme={form.status === 'Approved' ? 'green' : form.status.includes('Rejected') ? 'red' : 'yellow'}>
                     {form.status}
                   </Badge>
@@ -102,10 +102,11 @@ function StudentDashboard() {
                   {form.status === 'Rejected - Resubmit' ? (
                     <>
                       <Text color="red.500" fontSize="sm">{form.rejectionReason}</Text>
+                      {/* We would build the /re-apply/:id page next */}
                       <Button as={RouterLink} to={`/re-apply/${form._id}`} size="xs" mt={2} colorScheme="orange">Re-apply</Button>
                     </>
                   ) : (
-                    <Badge colorScheme={...}>{form.status}</Badge>
+                   <Text>-</Text>
                   )}
                 </Td>
               </Tr>
