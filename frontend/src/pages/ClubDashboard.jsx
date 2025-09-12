@@ -90,7 +90,9 @@ function ClubDashboard() {
                   {form.status === 'Rejected - Resubmit' ? (
                     <>
                       <Text color="red.500" fontSize="sm">{form.rejectionReason}</Text>
-                      <Button as={RouterLink} to={`/re-apply/${form._id}`} size="xs" mt={2} colorScheme="orange">Re-apply</Button>
+                      <Button as={RouterLink} to={`/re-apply/yellow/${form._id}`} size="xs" mt={2} colorScheme="orange">
+                          Re-apply
+                      </Button>
                     </>
                   ) : (
                    <Text>-</Text>

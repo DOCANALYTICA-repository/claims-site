@@ -102,8 +102,16 @@ function StudentDashboard() {
                   {form.status === 'Rejected - Resubmit' ? (
                     <>
                       <Text color="red.500" fontSize="sm">{form.rejectionReason}</Text>
-                      {/* We would build the /re-apply/:id page next */}
-                      <Button as={RouterLink} to={`/re-apply/${form._id}`} size="xs" mt={2} colorScheme="orange">Re-apply</Button>
+                      {/* Make the link conditional based on form type */}
+                      <Button 
+                        as={RouterLink} 
+                        to={form.formType === 'Blue' ? `/re-apply/${form._id}` : `/re-apply/pink/${form._id}`} 
+                        size="xs" 
+                        mt={2} 
+                        colorScheme="orange"
+                      >
+                        Re-apply
+                      </Button>
                     </>
                   ) : (
                    <Text>-</Text>
