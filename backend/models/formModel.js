@@ -2,6 +2,11 @@ import mongoose from 'mongoose';
 
 const formSchema = new mongoose.Schema(
   {
+    {
+    applicationNumber: { // <-- ADD THIS FIELD
+      type: String,
+      unique: true,
+    },
     submittedBy: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
@@ -16,6 +21,9 @@ const formSchema = new mongoose.Schema(
       type: String,
       required: true,
       default: 'Pending',
+    },
+    rejectionReason: {
+      type: String,
     },
     formData: {
       type: Object,

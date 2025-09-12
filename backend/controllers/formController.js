@@ -10,7 +10,12 @@ export const createForm = async (req, res) => {
     const { formType, formData } = req.body;
     if (!formType || !formData) { throw new Error('Please include all form fields'); }
 
+    const prefix = formType.substring(0, 2).toUpperCase(); // BL, YE, PI
+    const timestamp = Date.now().toString().slice(-6); // Last 6 digits of timestamp
+    const applicationNumber = `${prefix}-${timestamp}`;
+
     let newFormObject = {
+      applicationNumber,
       formType,
       formData,
       submittedBy: req.user._id,
@@ -20,7 +25,6 @@ export const createForm = async (req, res) => {
 
     if (formType === 'Blue') {
       const teacherNames = formData.subjects.map((s) => s.teacherName);
-      // THE FIX #1: Find unique teachers to prevent duplicate tasks
       const uniqueTeacherNames = [...new Set(teacherNames)]; 
       const teachers = await User.find({ name: { $in: uniqueTeacherNames }, role: 'Faculty/Staff' });
       const finalApprover = await User.findOne({ designation: 'HOD' });
@@ -157,7 +161,7 @@ export const getFormsForTeacherApproval = async (req, res) => {
 // @access Private/Faculty
 export const teacherApproveForm = async (req, res) => {
   try {
-    const { status } = req.body;
+    const { status, reason } = req.body; // Expects 'status' and optional 'reason'
     const form = await Form.findById(req.params.formId);
 
     if (!form) {
@@ -165,31 +169,34 @@ export const teacherApproveForm = async (req, res) => {
       throw new Error('Form not found');
     }
 
-    let approvalFound = false;
-    // THE FIX #2: Update ALL pending steps for this user, not just the first one
-    form.approvalChain.forEach(step => {
-      if (step.approverId && step.approverId.equals(req.user._id) && step.status === 'Pending') {
-        step.status = status;
-        step.approvedAt = Date.now();
-        approvalFound = true;
-      }
-    });
+    const approvalStep = form.approvalChain.find(
+      (step) => step.approverId && step.approverId.equals(req.user._id)
+    );
 
-    if (!approvalFound) {
+    if (!approvalStep || approvalStep.status !== 'Pending') {
       res.status(400);
       throw new Error('No pending approval found for this user');
     }
 
-    // Check if all teachers have now approved
-    const allTeacherSteps = form.approvalChain.filter(
-      step => step.approverId && !step.details // Filter out parent and final approver
-    );
-    const allTeachersApproved = allTeacherSteps.every(
-      step => step.status === 'Approved'
-    );
-    
-    if (allTeachersApproved) {
-        form.status = 'Pending Director Approval';
+    // Update the teacher's step in the chain
+    approvalStep.status = status;
+    approvalStep.approvedAt = Date.now();
+
+    if (status === 'Rejected') {
+      form.status = 'Rejected - Resubmit';
+      form.rejectionReason = reason; // Save the rejection reason to the main form document
+    } else {
+      // Check if all teachers have now approved to move to the next stage
+      const allTeacherSteps = form.approvalChain.filter(
+        (step) => step.approverId && !step.details
+      );
+      const allTeachersApproved = allTeacherSteps.every(
+        (step) => step.status === 'Approved'
+      );
+      
+      if (allTeachersApproved) {
+          form.status = 'Pending Director Approval';
+      }
     }
 
     const updatedForm = await form.save();
@@ -212,7 +219,6 @@ export const getFormById = async (req, res) => {
       throw new Error('Form not found');
     }
 
-    // Authorization check: User must be the submitter or an admin
     if (form.submittedBy._id.toString() !== req.user._id.toString() && req.user.role !== 'Faculty/Staff') {
         res.status(401);
         throw new Error('User not authorized');
