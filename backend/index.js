@@ -26,7 +26,11 @@ if (!fs.existsSync(uploadsDir)) {
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-app.use(cors({ origin: 'https://claims-site.vercel.app' }));
+app.use(cors({
+  origin: 'https://claims-site.vercel.app', // Allow your Vercel site
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow these methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allow these headers
+}));
 app.use(express.json());
 
 app.use('/api/users', userRoutes);
