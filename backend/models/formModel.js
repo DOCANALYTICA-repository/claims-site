@@ -1,9 +1,8 @@
 import mongoose from 'mongoose';
 
 const formSchema = new mongoose.Schema(
-  {
-    {
-    applicationNumber: { // <-- ADD THIS FIELD
+  { // This is the correct opening brace for the schema definition
+    applicationNumber: {
       type: String,
       unique: true,
     },
@@ -33,11 +32,11 @@ const formSchema = new mongoose.Schema(
       {
         approverId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         status: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
-        details: { type: String }, // <-- ADD THIS LINE
+        details: { type: String },
         approvedAt: { type: Date },
       },
     ],
-  },
+  }, // This is the correct closing brace for the schema definition
   {
     timestamps: true,
   }
@@ -45,4 +44,4 @@ const formSchema = new mongoose.Schema(
 
 const Form = mongoose.model('Form', formSchema);
 
-export default Form; // <-- Ensure this line is 'export default'
+export default Form;
