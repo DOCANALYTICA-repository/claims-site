@@ -79,7 +79,7 @@ export const getAllForms = async (req, res) => {
 // @access Private/HOD
 export const updateFormStatus = async (req, res) => {
   try {
-    const { status } = req.body;
+    const { status, reason } = req.body; // Now accepts 'reason'
     const form = await Form.findById(req.params.id);
 
     if (!form) {
@@ -88,8 +88,11 @@ export const updateFormStatus = async (req, res) => {
     }
 
     form.status = status;
+    if (reason) {
+      form.rejectionReason = reason; // Save the reason if it exists
+    }
+    
     const updatedForm = await form.save();
-
     res.status(200).json(updatedForm);
   } catch (error) {
     res.status(400).json({ message: error.message });

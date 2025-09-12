@@ -12,6 +12,7 @@ function HodDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
+
   const [rejectionReason, setRejectionReason] = useState('');
   const [selectedFormId, setSelectedFormId] = useState(null);
 
@@ -35,6 +36,7 @@ function HodDashboard() {
 
   const handleApprove = async (formId) => {
     try {
+      // Use the general updateFormStatus for HOD approval
       await formService.updateFormStatus(formId, { status: 'Approved' });
       toast({ title: 'Form Approved.', status: 'success' });
       fetchAllForms();
@@ -54,6 +56,7 @@ function HodDashboard() {
       return;
     }
     try {
+      // Use the general updateFormStatus for HOD rejection
       await formService.updateFormStatus(selectedFormId, { status: 'Rejected - Resubmit', reason: rejectionReason });
       toast({ title: 'Form Rejected.', status: 'success' });
       onClose();
