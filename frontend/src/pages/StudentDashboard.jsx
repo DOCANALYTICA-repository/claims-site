@@ -79,6 +79,7 @@ function StudentDashboard() {
               <Th>Form Type</Th>
               <Th>Status</Th>
               <Th>Submitted On</Th>
+              <Th>Actions / Reason</Th>
             </Tr>
           </Thead>
           <Tbody>
@@ -95,6 +96,16 @@ function StudentDashboard() {
                   </Badge>
                 </Td>
                 <Td>{new Date(form.createdAt).toLocaleDateString()}</Td>
+                <Td>
+                  {form.status === 'Rejected - Resubmit' ? (
+                    <>
+                      <Text color="red.500" fontSize="sm">{form.rejectionReason}</Text>
+                      <Button as={RouterLink} to={`/re-apply/${form._id}`} size="xs" mt={2} colorScheme="orange">Re-apply</Button>
+                    </>
+                  ) : (
+                    <Badge colorScheme={...}>{form.status}</Badge>
+                  )}
+                </Td>
               </Tr>
             ))}
           </Tbody>
