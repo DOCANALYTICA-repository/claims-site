@@ -1,11 +1,23 @@
 import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Papa from 'papaparse';
+import Select from 'react-select'; // Import react-select
 import {
-  Box, Button, FormControl, FormLabel, Input, VStack, HStack, Heading, Text, useToast, Grid, GridItem, NumberInput, NumberInputField
+  Box, Button, FormControl, FormLabel, Input, VStack, HStack, Heading, Text, useToast, Grid, GridItem
 } from '@chakra-ui/react';
 import AuthContext from '../context/AuthContext.jsx';
 import formService from '../services/formService.js';
+
+// Define period options
+const periodOptions = [
+  { value: 'Period7_00AM', label: 'Period 7:00 AM' },
+  { value: 'Period8_00AM', label: 'Period 8:00 AM' },
+  { value: 'Period9_45AM', label: 'Period 9:45 AM' },
+  { value: 'Period10_45AM', label: 'Period 10:45 AM' },
+  { value: 'Period11_45AM', label: 'Period 11:45 AM' },
+  { value: 'Period1_45PM', label: 'Period 1:45 PM' },
+  { value: 'Period2_45PM', label: 'Period 2:45 PM' },
+];
 
 function YellowFormPage() {
   const { user } = useContext(AuthContext);
@@ -13,45 +25,24 @@ function YellowFormPage() {
   const toast = useToast();
 
   const [eventName, setEventName] = useState('');
-  // THE FIX: Move attendance fields into the student object
-  const [students, setStudents] = useState([{ 
-    regNo: '', 
-    studentName: '', 
-    className: '', 
-    attendanceWithClaims: '', 
-    attendanceWithoutClaims: '' 
-  }]);
+  const [students, setStudents] = useState([{ regNo: '', studentName: '', className: '', periodsMissed: [] }]); // Add periodsMissed to state
   const [file, setFile] = useState(null);
 
   const handleStudentChange = (index, event) => {
-    const values = [...students];
-    // This now handles both text inputs and number inputs from Chakra
-    if (typeof event === 'object' && event.target) {
-      values[index][event.target.name] = event.target.value;
-    } else {
-      // This handles the NumberInput's onChange, which just passes the value
-      // We need to know which field it was for. Let's assume we pass the name.
-      // Let's refactor this to be simpler.
-    }
-    setStudents(values);
-  };
-  
-  // A simpler set of handlers for clarity
-  const handleStudentTextChange = (index, event) => {
     const values = [...students];
     values[index][event.target.name] = event.target.value;
     setStudents(values);
   };
   
-  const handleStudentNumberChange = (index, name, value) => {
+  // New handler for the period multi-select
+  const handlePeriodChange = (index, selectedOptions) => {
     const values = [...students];
-    values[index][name] = value;
+    values[index].periodsMissed = selectedOptions;
     setStudents(values);
   };
 
-
   const addStudentRow = () => {
-    setStudents([...students, { regNo: '', studentName: '', className: '', attendanceWithClaims: '', attendanceWithoutClaims: '' }]);
+    setStudents([...students, { regNo: '', studentName: '', className: '', periodsMissed: [] }]);
   };
 
   const removeStudentRow = (index) => {
@@ -65,23 +56,41 @@ function YellowFormPage() {
   };
 
   const parseFile = () => {
+
     if (!file) return;
+
     Papa.parse(file, {
+
       header: true,
+
       skipEmptyLines: true,
+
       complete: (results) => {
+
         // Ensure all fields are present, even if missing from CSV
+
         const parsedStudents = results.data.map(student => ({
+
             regNo: student.regNo || '',
+
             studentName: student.studentName || '',
+
             className: student.className || '',
+
             attendanceWithClaims: student.attendanceWithClaims || '',
+
             attendanceWithoutClaims: student.attendanceWithoutClaims || ''
+
         }));
+
         setStudents(parsedStudents);
+
         toast({ title: 'File Parsed', description: `${results.data.length} students loaded.`, status: 'success', duration: 3000, isClosable: true });
+
       },
+
     });
+
   };
 
   const onSubmit = async (e) => {
@@ -91,10 +100,13 @@ function YellowFormPage() {
         formType: 'Yellow',
         formData: {
           eventName,
-          students, // The students array now contains all the data
+          students: students.map(s => ({
+              ...s,
+              periodsMissed: s.periodsMissed.map(p => p.value) // Extract values for submission
+          })),
         },
       };
-      await formService.createForm(newFormData);
+      await formService.createForm(newFormData, user.token);
       toast({ title: 'Form Submitted', status: 'success', duration: 3000, isClosable: true });
       window.location.href = '/club';
     } catch (error) {
@@ -120,32 +132,23 @@ function YellowFormPage() {
             <Input type="file" accept=".csv" p={1.5} onChange={handleFileChange} />
             <Button onClick={parseFile} disabled={!file} colorScheme="brand">Parse File</Button>
           </HStack>
-          <Text fontSize="xs" color="gray.500" mt={1}>Headers: regNo, studentName, className, attendanceWithClaims, attendanceWithoutClaims</Text>
+          <Text fontSize="xs" color="gray.500" mt={1}>Headers: regNo, studentName, className</Text>
         </Box>
 
         <VStack spacing={4} align="stretch">
           <Heading as="h3" size="md" mt={4} borderBottomWidth="1px" pb={2}>Student List</Heading>
-          {/* Table headers */}
-          <Grid templateColumns="repeat(6, 1fr)" gap={4} fontWeight="bold">
-            <GridItem>Reg No</GridItem>
-            <GridItem>Student Name</GridItem>
-            <GridItem>Class</GridItem>
-            <GridItem>% With Claims</GridItem>
-            <GridItem>% Without Claims</GridItem>
-            <GridItem>Action</GridItem>
-          </Grid>
-
           {students.map((student, index) => (
-            <Grid key={index} templateColumns="repeat(6, 1fr)" gap={4} alignItems="center">
-                <Input variant="flushed" placeholder="Reg No" name="regNo" value={student.regNo} onChange={(e) => handleStudentTextChange(index, e)} />
-                <Input variant="flushed" placeholder="Student Name" name="studentName" value={student.studentName} onChange={(e) => handleStudentTextChange(index, e)} />
-                <Input variant="flushed" placeholder="Class Name" name="className" value={student.className} onChange={(e) => handleStudentTextChange(index, e)} />
-                <NumberInput size="sm" min={0} max={100} value={student.attendanceWithClaims} onChange={(valStr, valNum) => handleStudentNumberChange(index, 'attendanceWithClaims', valNum)}>
-                  <NumberInputField variant="flushed" placeholder="e.g., 85" />
-                </NumberInput>
-                <NumberInput size="sm" min={0} max={100} value={student.attendanceWithoutClaims} onChange={(valStr, valNum) => handleStudentNumberChange(index, 'attendanceWithoutClaims', valNum)}>
-                  <NumberInputField variant="flushed" placeholder="e.g., 75" />
-                </NumberInput>
+            <Grid key={index} templateColumns="1fr 2fr 1fr 3fr 1fr" gap={4} alignItems="center">
+                <Input variant="flushed" placeholder="Reg No" name="regNo" value={student.regNo} onChange={(e) => handleStudentChange(index, e)} />
+                <Input variant="flushed" placeholder="Student Name" name="studentName" value={student.studentName} onChange={(e) => handleStudentChange(index, e)} />
+                <Input variant="flushed" placeholder="Class Name" name="className" value={student.className} onChange={(e) => handleStudentChange(index, e)} />
+                <Select
+                  isMulti
+                  options={periodOptions}
+                  value={student.periodsMissed}
+                  onChange={(selected) => handlePeriodChange(index, selected)}
+                  placeholder="Select Periods Missed..."
+                />
                 <Button size="sm" colorScheme="red" variant="ghost" onClick={() => removeStudentRow(index)}>Remove</Button>
             </Grid>
           ))}
