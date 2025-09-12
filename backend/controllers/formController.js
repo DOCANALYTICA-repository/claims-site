@@ -7,17 +7,10 @@ import sendEmail from '../utils/sendEmail.js';
 // @access Private
 export const createForm = async (req, res) => {
   try {
-    console.log('--- CREATE FORM REQUEST RECEIVED ---');
-    console.log('Request Body (req.body):', JSON.stringify(req.body, null, 2));
     const { formType, formData } = req.body;
     if (!formType || !formData) { throw new Error('Please include all form fields'); }
 
-    const prefix = formType.substring(0, 2).toUpperCase(); // BL, YE, PI
-    const timestamp = Date.now().toString().slice(-6); // Last 6 digits of timestamp
-    const applicationNumber = `${prefix}-${timestamp}`;
-
     let newFormObject = {
-      applicationNumber,
       formType,
       formData,
       submittedBy: req.user._id,
@@ -26,18 +19,11 @@ export const createForm = async (req, res) => {
     };
 
     if (formType === 'Blue') {
-      const teacherNames = formData.subjects.map((s) => s.teacherName);
-      const uniqueTeacherNames = [...new Set(teacherNames)]; 
-      const teachers = await User.find({ name: { $in: uniqueTeacherNames }, role: 'Faculty/Staff' });
       const finalApprover = await User.findOne({ designation: 'HOD' });
-
       let chain = [];
-      chain.push({ approverId: null, status: 'Pending', details: `Parent (${formData.parentEmail})` });
-      
-      teachers.forEach(teacher => {
-        chain.push({ approverId: teacher._id, status: 'Pending' });
-      });
 
+      // Simplified chain: Parent -> HOD
+      chain.push({ approverId: null, status: 'Pending', details: `Parent (${formData.parentEmail})` });
       if (finalApprover) {
         chain.push({ approverId: finalApprover._id, status: 'Pending' });
       }
@@ -57,7 +43,7 @@ export const createForm = async (req, res) => {
         message,
       });
     }
-    
+
     res.status(201).json(form);
   } catch (error) {
     res.status(400).json({ message: error.message });
