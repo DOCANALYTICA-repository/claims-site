@@ -35,6 +35,7 @@ function FormDetailsPage() {
   return (
     <Box p={8} borderWidth={1} borderRadius={8} boxShadow="lg">
       <Heading mb={4}>Form Details</Heading>
+      <Text><strong>Application #:</strong> {form.applicationNumber}</Text>
       <Text><strong>Status:</strong> {form.status}</Text>
       <Text><strong>Submitted By:</strong> {form.submittedBy.name}</Text>
       <Text><strong>Form Type:</strong> {form.formType}</Text>

@@ -76,6 +76,7 @@ function StudentDashboard() {
         <Table variant="striped" colorScheme="brand">
           <Thead>
             <Tr>
+              <Th>App #</Th>
               <Th>Form Type</Th>
               <Th>Status</Th>
               <Th>Submitted On</Th>
@@ -85,6 +86,7 @@ function StudentDashboard() {
           <Tbody>
             {forms.map((form) => (
               <Tr key={form._id}>
+                <Td>{form.applicationNumber}</Td>
                 <Td>
                   <Link as={RouterLink} to={`/form/${form._id}`} fontWeight="bold">
                     {form.formType}
