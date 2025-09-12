@@ -1,22 +1,22 @@
 import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../services/api.js'; // <-- THE FIX: Import our central api client
+import Select from 'react-select';
 import {
-  Box,
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  Textarea,
-  VStack,
-  HStack,
-  Heading,
-  Grid,
-  GridItem,
-  useToast,
+  Box, Button, FormControl, FormLabel, Input, Textarea, VStack, Heading, Grid, GridItem, useToast
 } from '@chakra-ui/react';
-import api from '../services/api';
 import AuthContext from '../context/AuthContext.jsx';
 import formService from '../services/formService.js';
+
+const periodOptions = [
+  { value: 'Period7_00AM', label: 'Period 7:00 AM' },
+  { value: 'Period8_00AM', label: 'Period 8:00 AM' },
+  { value: 'Period9_45AM', label: 'Period 9:45 AM' },
+  { value: 'Period10_45AM', label: 'Period 10:45 AM' },
+  { value: 'Period11_45AM', label: 'Period 11:45 AM' },
+  { value: 'Period1_45PM', label: 'Period 1:45 PM' },
+  { value: 'Period2_45PM', label: 'Period 2:45 PM' },
+];
 
 function CreateFormPage() {
   const { user } = useContext(AuthContext);
@@ -27,37 +27,16 @@ function CreateFormPage() {
   const [leaveFrom, setLeaveFrom] = useState('');
   const [leaveTo, setLeaveTo] = useState('');
   const [reason, setReason] = useState('');
-  const [subjects, setSubjects] = useState([{ subjectName: '', teacherName: '', periods: '' }]);
   const [document, setDocument] = useState(null);
-
   const [uploading, setUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleSubjectChange = (index, event) => {
-    const values = [...subjects];
-    values[index][event.target.name] = event.target.value;
-    setSubjects(values);
-  };
-
-  const addSubjectRow = () => {
-    setSubjects([...subjects, { subjectName: '', teacherName: '', periods: '' }]);
-  };
-
-  const removeSubjectRow = (index) => {
-    const values = [...subjects];
-    values.splice(index, 1);
-    setSubjects(values);
-  };
-
-  const handleFileChange = (e) => {
-    setDocument(e.target.files[0]);
-  };
+  const [periodsMissed, setPeriodsMissed] = useState([]);
 
   const onSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-
     let documentPath = '';
+
     if (document) {
       setUploading(true);
       const uploadFormData = new FormData();
@@ -77,7 +56,14 @@ function CreateFormPage() {
     try {
       const newFormData = {
         formType: 'Blue',
-        formData: { leaveFrom, leaveTo, reason, subjects, documentPath, parentEmail },
+        formData: {
+          leaveFrom,
+          leaveTo,
+          reason,
+          documentPath,
+          parentEmail,
+          periodsMissed: periodsMissed.map(p => p.value)
+        },
       };
       await formService.createForm(newFormData);
       toast({ title: 'Form Submitted', status: 'success', duration: 3000, isClosable: true });
@@ -105,31 +91,32 @@ function CreateFormPage() {
         <FormControl isRequired><FormLabel fontSize="sm">Reason for Leave:</FormLabel><Textarea variant="flushed" value={reason} onChange={(e) => setReason(e.target.value)} /></FormControl>
         <FormControl isRequired><FormLabel fontSize="sm">Parent's Email:</FormLabel><Input variant="flushed" type="email" value={parentEmail} onChange={(e) => setParentEmail(e.target.value)} /></FormControl>
 
-        <VStack spacing={2} align="stretch">
-            <Heading as="h3" size="md" mt={4} borderBottomWidth="1px" pb={2}>Subjects Missed</Heading>
-            {subjects.map((subject, index) => (
-                <Grid key={index} templateColumns="3fr 3fr 1fr 1fr" gap={4} alignItems="center">
-                    {/* THE FIX: Added self-closing slashes to all three Input tags */}
-                    <Input variant="flushed" placeholder="Subject Name" name="subjectName" value={subject.subjectName} onChange={(e) => handleSubjectChange(index, e)} />
-                    <Input variant="flushed" placeholder="Teacher Name" name="teacherName" value={subject.teacherName} onChange={(e) => handleSubjectChange(index, e)} />
-                    <Input variant="flushed" type="number" placeholder="Periods" name="periods" value={subject.periods} onChange={(e) => handleSubjectChange(index, e)} />
-                    <Button size="sm" colorScheme="red" variant="ghost" onClick={() => removeSubjectRow(index)}>Remove</Button>
-                </Grid>
-            ))}
-            <Button size="sm" onClick={addSubjectRow} alignSelf="flex-start" mt={2}>Add Student</Button>
-        </VStack>
+        <FormControl isRequired>
+          <FormLabel fontSize="sm">Periods Missed:</FormLabel>
+          <Select
+            isMulti
+            name="periods"
+            options={periodOptions}
+            className="basic-multi-select"
+            classNamePrefix="select"
+            onChange={setPeriodsMissed}
+          />
+        </FormControl>
 
-        <FormControl><FormLabel fontSize="sm">Medical Certificate:</FormLabel><Input type="file" p={1.5} onChange={handleFileChange} /></FormControl>
+        <FormControl>
+          <FormLabel fontSize="sm">Medical Certificate:</FormLabel>
+          <Input type="file" p={1.5} onChange={(e) => setDocument(e.target.files[0])} />
+        </FormControl>
         
         <Button
-            type="submit"
-            colorScheme="brand"
-            isLoading={isSubmitting || uploading}
-            loadingText="Submitting..."
-            disabled={uploading || isSubmitting}
-            mt={6}
+          type="submit"
+          colorScheme="brand"
+          isLoading={isSubmitting || uploading}
+          loadingText="Submitting..."
+          disabled={uploading || isSubmitting}
+          mt={6}
         >
-            Submit Application
+          Submit Application
         </Button>
       </VStack>
     </Box>
