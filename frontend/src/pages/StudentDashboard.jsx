@@ -84,7 +84,7 @@ function StudentDashboard() {
             </Tr>
           </Thead>
           <Tbody>
-            {forms.map((form) => (
+            {(forms || []).map((form) => (
               <Tr key={form._id}>
                 <Td>{form.applicationNumber}</Td>
                 <Td>
