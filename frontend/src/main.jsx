@@ -19,7 +19,6 @@ import PinkFormPage from './pages/PinkFormPage.jsx';
 import TeacherDashboard from './pages/TeacherDashboard.jsx';
 import FormDetailsPage from './pages/FormDetailsPage.jsx';
 import ReapplyYellowFormPage from './pages/ReapplyYellowFormPage.jsx';
-import ReapplyYellowFormPage from './pages/ReapplyYellowFormPage.jsx';
 import ReapplyPinkFormPage from './pages/ReapplyPinkFormPage.jsx';
 
 // Define our routes
