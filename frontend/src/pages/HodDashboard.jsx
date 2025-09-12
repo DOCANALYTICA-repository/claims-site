@@ -54,7 +54,6 @@ function HodDashboard() {
       return;
     }
     try {
-      // Use the 'updateFormStatus' endpoint, which also needs to be updated on the backend
       await formService.updateFormStatus(selectedFormId, { status: 'Rejected - Resubmit', reason: rejectionReason });
       toast({ title: 'Form Rejected.', status: 'success' });
       onClose();
@@ -72,24 +71,49 @@ function HodDashboard() {
   return (
     <Box>
       <Heading as="h1" size="lg" mb={8}>HOD Dashboard</Heading>
-      {/* ... Table and mapping logic ... */}
-      <Tbody>
-        {forms.map((form) => (
-          <Tr key={form._id}>
-            {/* ... other Td ... */}
-            <Td>
-              {form.status.includes('Pending') && (
-                <>
-                  <Button size="sm" colorScheme="green" onClick={() => handleApprove(form._id)}>Approve</Button>
-                  <Button size="sm" colorScheme="red" ml={2} onClick={() => handleRejectClick(form._id)}>Reject</Button>
-                </>
-              )}
-            </Td>
-          </Tr>
-        ))}
-      </Tbody>
+      {forms && forms.length > 0 ? (
+        <Table variant="striped" colorScheme="brand">
+          <Thead>
+            <Tr>
+              <Th>Student</Th>
+              <Th>Form Type</Th>
+              <Th>Status</Th>
+              <Th>Submitted</Th>
+              <Th>Actions</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {forms.map((form) => (
+              <Tr key={form._id}>
+                <Td>
+                  <Link as={RouterLink} to={`/form/${form._id}`} fontWeight="bold">
+                    {form.submittedBy ? form.submittedBy.name : 'N/A'}
+                  </Link>
+                </Td>
+                <Td>{form.formType}</Td>
+                <Td>
+                  <Badge colorScheme={form.status === 'Approved' ? 'green' : form.status.includes('Rejected') ? 'red' : 'yellow'}>
+                    {form.status}
+                  </Badge>
+                </Td>
+                <Td>{new Date(form.createdAt).toLocaleString()}</Td>
+                <Td>
+                  {form.status.includes('Pending') && (
+                    <>
+                      <Button size="sm" colorScheme="green" onClick={() => handleApprove(form._id)}>Approve</Button>
+                      <Button size="sm" colorScheme="red" ml={2} onClick={() => handleRejectClick(form._id)}>Reject</Button>
+                    </>
+                  )}
+                </Td>
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+      ) : (
+        <Text>No forms have been submitted yet.</Text>
+      )}
 
-      {/* ... Rejection Modal ... */}
+      {/* Rejection Reason Modal */}
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
