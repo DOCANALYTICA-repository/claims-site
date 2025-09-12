@@ -4,33 +4,35 @@ import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import fs from 'fs'; // <-- 1. IMPORT FILE SYSTEM MODULE
 import userRoutes from './routes/userRoutes.js';
 import formRoutes from './routes/formRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 
-// Define __dirname for ES Modules (do this only once at the top)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// This will load the .env file ONLY if we are not in a production environment
 if (process.env.NODE_ENV !== 'production') {
   dotenv.config({ path: path.join(__dirname, '../.env') });
 }
 
+// --- 2. CREATE UPLOADS FOLDER IF IT DOESN'T EXIST ---
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
+// --- END OF NEW CODE ---
+
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Use specific CORS configuration for your live site
-app.use(cors({
-  origin: 'https://claims-site.vercel.app'
-}));
+app.use(cors({ origin: 'https://claims-site.vercel.app' }));
 app.use(express.json());
 
 app.use('/api/users', userRoutes);
 app.use('/api/forms', formRoutes);
 app.use('/api/upload', uploadRoutes);
 
-// Use the reliable __dirname (defined at the top) to serve your uploads folder
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 
 const startServer = async () => {
