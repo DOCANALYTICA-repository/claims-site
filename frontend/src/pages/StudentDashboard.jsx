@@ -93,7 +93,7 @@ function StudentDashboard() {
                   </Link>
                 </Td>
                 <Td>
-                  <Badge colorScheme={form.status === 'Approved' ? 'green' : form.status === 'Rejected' ? 'red' : 'yellow'}>
+                  <Badge colorScheme={form.status === 'Approved' ? 'green' : form.status.includes('Rejected') ? 'red' : 'yellow'}>
                     {form.status}
                   </Badge>
                 </Td>
