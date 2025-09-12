@@ -7,6 +7,8 @@ import sendEmail from '../utils/sendEmail.js';
 // @access Private
 export const createForm = async (req, res) => {
   try {
+    console.log('--- CREATE FORM REQUEST RECEIVED ---');
+    console.log('Request Body (req.body):', JSON.stringify(req.body, null, 2));
     const { formType, formData } = req.body;
     if (!formType || !formData) { throw new Error('Please include all form fields'); }
 
