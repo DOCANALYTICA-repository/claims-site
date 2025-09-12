@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from 'react';
-import { Link as RouterLink } from 'react-router-dom'; // <-- IMPORT RouterLink
+import { Link as RouterLink } from 'react-router-dom';
 import {
   Box,
   Heading,
@@ -14,7 +14,17 @@ import {
   Button,
   Stack,
   Skeleton,
-  Link, // <-- IMPORT Chakra's Link
+  Link,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  Textarea,
+  useDisclosure,
+  useToast,
 } from '@chakra-ui/react';
 import AuthContext from '../context/AuthContext.jsx';
 import formService from '../services/formService.js';
@@ -23,10 +33,16 @@ function HodDashboard() {
   const { user } = useContext(AuthContext);
   const [forms, setForms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const toast = useToast();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [selectedFormId, setSelectedFormId] = useState(null);
 
   const fetchAllForms = async () => {
+    setIsLoading(true);
     try {
-      if (user && user.token) {
+      if (user) {
         const data = await formService.getAllForms();
         setForms(data);
       }
@@ -41,12 +57,34 @@ function HodDashboard() {
     fetchAllForms();
   }, [user]);
 
-  const handleStatusUpdate = async (formId, newStatus) => {
+  const handleApprove = async (formId) => {
     try {
-      await formService.updateFormStatus(formId, { status: newStatus });
+      await formService.updateFormStatus(formId, { status: 'Approved' });
+      toast({ title: 'Form Approved.', status: 'success' });
       fetchAllForms();
     } catch (error) {
-      console.error('Failed to update status:', error);
+      toast({ title: 'Update Failed.', description: error.message, status: 'error' });
+    }
+  };
+
+  const handleRejectClick = (formId) => {
+    setSelectedFormId(formId);
+    onOpen();
+  };
+
+  const submitRejection = async () => {
+    if (!rejectionReason) {
+      toast({ title: 'Please provide a reason for rejection.', status: 'warning' });
+      return;
+    }
+    try {
+      await formService.updateFormStatus(selectedFormId, { status: 'Rejected', reason: rejectionReason });
+      toast({ title: 'Form Rejected.', status: 'success' });
+      onClose();
+      setRejectionReason('');
+      fetchAllForms();
+    } catch (error) {
+      toast({ title: 'Update Failed.', description: error.message, status: 'error' });
     }
   };
 
@@ -78,23 +116,22 @@ function HodDashboard() {
             {forms.map((form) => (
               <Tr key={form._id}>
                 <Td>
-                  {/* Make the name a clickable link */}
                   <Link as={RouterLink} to={`/form/${form._id}`} fontWeight="bold">
                     {form.submittedBy ? form.submittedBy.name : 'N/A'}
                   </Link>
                 </Td>
                 <Td>{form.formType}</Td>
                 <Td>
-                  <Badge colorScheme={form.status === 'Approved' ? 'green' : form.status === 'Rejected' ? 'red' : 'gray'}>
+                  <Badge colorScheme={form.status === 'Approved' ? 'green' : form.status.includes('Rejected') ? 'red' : 'yellow'}>
                     {form.status}
                   </Badge>
                 </Td>
                 <Td>{new Date(form.createdAt).toLocaleString()}</Td>
                 <Td>
-                  {form.status.startsWith('Pending') && ( // Show buttons for any pending status
+                  {form.status.includes('Pending') && (
                     <>
-                      <Button size="sm" colorScheme="green" onClick={() => handleStatusUpdate(form._id, 'Approved')}>Approve</Button>
-                      <Button size="sm" colorScheme="red" ml={2} onClick={() => handleStatusUpdate(form._id, 'Rejected')}>Reject</Button>
+                      <Button size="sm" colorScheme="green" onClick={() => handleApprove(form._id)}>Approve</Button>
+                      <Button size="sm" colorScheme="red" ml={2} onClick={() => handleRejectClick(form._id)}>Reject</Button>
                     </>
                   )}
                 </Td>
@@ -105,6 +142,26 @@ function HodDashboard() {
       ) : (
         <Text>No forms have been submitted yet.</Text>
       )}
+
+      {/* Rejection Reason Modal */}
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Reason for Rejection</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Textarea
+              placeholder="Please provide a clear reason for rejecting this claim..."
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+            />
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="brand" mr={3} onClick={submitRejection}>Submit Rejection</Button>
+            <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 }
