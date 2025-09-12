@@ -28,7 +28,6 @@ function ClubDashboard() {
     const fetchForms = async () => {
       if (user) {
         try {
-          // CORRECTED: Call the simpler function without the token
           const data = await formService.getUserForms();
           setForms(data);
         } catch (error) {
@@ -53,9 +52,7 @@ function ClubDashboard() {
 
   return (
     <Box>
-      {/* CORRECTED: Added safety check for user name */}
       <Heading as="h1" size="lg" mb={4}>Welcome, {user?.name}</Heading>
-
       <Button as={RouterLink} to="/yellow-form" colorScheme="yellow" mb={8}>
         Submit New Yellow Form
       </Button>
@@ -64,30 +61,42 @@ function ClubDashboard() {
         Your Submitted Forms
       </Heading>
 
-      {forms && forms.length > 0 ? (
+      {(forms || []).length > 0 ? (
         <Table variant="striped" colorScheme="brand">
           <Thead>
             <Tr>
               <Th>Event Name</Th>
               <Th>Status</Th>
               <Th>Submitted On</Th>
+              <Th>Actions / Reason</Th> {/* <-- ADDED HEADER */}
             </Tr>
           </Thead>
           <Tbody>
-            {forms.map((form) => (
+            {(forms || []).map((form) => (
               <Tr key={form._id}>
                 <Td>
-                  {/* NEW: Made event name a clickable link */}
                   <Link as={RouterLink} to={`/form/${form._id}`} fontWeight="bold">
                     {form.formData.eventName}
                   </Link>
                 </Td>
                 <Td>
-                  <Badge colorScheme={form.status === 'Approved' ? 'green' : form.status === 'Rejected' ? 'red' : 'yellow'}>
+                  <Badge colorScheme={form.status === 'Approved' ? 'green' : form.status.includes('Rejected') ? 'red' : 'yellow'}>
                     {form.status}
                   </Badge>
                 </Td>
                 <Td>{new Date(form.createdAt).toLocaleDateString()}</Td>
+                {/* --- NEW COLUMN LOGIC --- */}
+                <Td>
+                  {form.status === 'Rejected - Resubmit' ? (
+                    <>
+                      <Text color="red.500" fontSize="sm">{form.rejectionReason}</Text>
+                      <Button as={RouterLink} to={`/re-apply/${form._id}`} size="xs" mt={2} colorScheme="orange">Re-apply</Button>
+                    </>
+                  ) : (
+                   <Text>-</Text>
+                  )}
+                </Td>
+                {/* --- END NEW COLUMN --- */}
               </Tr>
             ))}
           </Tbody>
