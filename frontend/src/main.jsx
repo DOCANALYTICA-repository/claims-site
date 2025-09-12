@@ -18,6 +18,9 @@ import ClubDashboard from './pages/ClubDashboard.jsx';
 import PinkFormPage from './pages/PinkFormPage.jsx';
 import TeacherDashboard from './pages/TeacherDashboard.jsx';
 import FormDetailsPage from './pages/FormDetailsPage.jsx';
+import ReapplyYellowFormPage from './pages/ReapplyYellowFormPage.jsx';
+import ReapplyYellowFormPage from './pages/ReapplyYellowFormPage.jsx';
+import ReapplyPinkFormPage from './pages/ReapplyPinkFormPage.jsx';
 
 // Define our routes
 const router = createBrowserRouter([
@@ -44,8 +47,7 @@ const router = createBrowserRouter([
             <HodDashboard />
           </ProtectedRoute>
         ),
-
-      },
+      }, // <-- THE FIX: ADD A COMMA HERE
       {
         path: '/create-form',
         element: (
@@ -54,7 +56,7 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      { //                              <-- ADD THIS NEW ROUTE
+      {
         path: '/yellow-form',
         element: (
           <ProtectedRoute>
@@ -62,7 +64,7 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      { //                              <-- ADD THIS NEW ROUTE
+      {
         path: '/club',
         element: (
           <ProtectedRoute>
@@ -70,7 +72,7 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      { //                              <-- ADD THIS NEW ROUTE
+      {
         path: '/pink-form',
         element: (
           <ProtectedRoute>
@@ -78,7 +80,7 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      { //                              <-- ADD THIS NEW ROUTE
+      {
         path: '/teacher',
         element: (
           <ProtectedRoute>
@@ -87,18 +89,42 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: '/form/:id', // <-- ADD NEW DYNAMIC ROUTE
+        path: '/form/:id',
         element: (
           <ProtectedRoute>
             <FormDetailsPage />
           </ProtectedRoute>
         ),
       },
-      { //                              <-- ADD THIS NEW ROUTE
-        path: '/re-apply/:id', // The :id is a dynamic parameter
+      {
+        path: '/re-apply/:id',
         element: (
           <ProtectedRoute>
             <CreateFormPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/re-apply/yellow/:id',
+        element: (
+          <ProtectedRoute>
+            <ReapplyYellowFormPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/re-apply/pink/:id',
+        element: (
+          <ProtectedRoute>
+            <ReapplyPinkFormPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/re-apply/yellow/:id',
+        element: (
+          <ProtectedRoute>
+            <ReapplyYellowFormPage />
           </ProtectedRoute>
         ),
       },

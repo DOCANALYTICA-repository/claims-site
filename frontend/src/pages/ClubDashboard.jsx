@@ -87,16 +87,24 @@ function ClubDashboard() {
                 <Td>{new Date(form.createdAt).toLocaleDateString()}</Td>
                 {/* --- NEW COLUMN LOGIC --- */}
                 <Td>
-                  {form.status === 'Rejected - Resubmit' ? (
-                    <>
-                      <Text color="red.500" fontSize="sm">{form.rejectionReason}</Text>
-                      <Button as={RouterLink} to={`/re-apply/yellow/${form._id}`} size="xs" mt={2} colorScheme="orange">
+                  <Td>
+                    {form.status === 'Rejected - Resubmit' ? (
+                      <>
+                        <Text color="red.500" fontSize="sm">{form.rejectionReason}</Text>
+                        <Button 
+                          as={RouterLink} 
+                          to={`/re-apply/yellow/${form._id}`}  // <-- Ensure this path is correct
+                          size="xs" 
+                          mt={2} 
+                          colorScheme="orange"
+                        >
                           Re-apply
-                      </Button>
-                    </>
-                  ) : (
-                   <Text>-</Text>
-                  )}
+                        </Button>
+                      </>
+                    ) : (
+                     <Text>-</Text>
+                    )}
+                  </Td>
                 </Td>
                 {/* --- END NEW COLUMN --- */}
               </Tr>
